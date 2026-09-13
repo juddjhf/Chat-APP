@@ -19,7 +19,7 @@ const server = http.createServer(app);
 // Socket.IO Setup
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: "https://chat-app-1-7lvl.onrender.com",
         methods: ["GET", "POST"]
     }
 });
