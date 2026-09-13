@@ -1,11 +1,6 @@
-function Messages({ messages }) {
-
-    // =========================
-    // FORMAT MESSAGE TIME
-    // =========================
+function Messages({ messages, currentNickname }) {
 
     const formatTime = (date) => {
-
         return new Date(date).toLocaleTimeString(
             "en-IN",
             {
@@ -14,14 +9,10 @@ function Messages({ messages }) {
                 hour12: true
             }
         );
-
     };
-
 
     return (
         <div className="messages">
-
-            {/* NO MESSAGES */}
 
             {messages.length === 0 ? (
 
@@ -31,38 +22,37 @@ function Messages({ messages }) {
 
             ) : (
 
-                /* MESSAGE LIST */
+                messages.map((item) => {
 
-                messages.map((item) => (
+                    const isMyMessage =
+                        item.nickname === currentNickname;
 
-                    <div
-                        className="message"
-                        key={item._id}
-                    >
+                    return (
+                        <div
+                            className={`message ${
+                                isMyMessage
+                                    ? "my-message"
+                                    : "other-message"
+                            }`}
+                            key={item._id}
+                        >
 
-                        {/* NICKNAME */}
+                            <strong>
+                                {item.nickname}
+                            </strong>
 
-                        <strong>
-                            {item.nickname}
-                        </strong>
+                            <p>
+                                {item.message}
+                            </p>
 
+                            <small className="message-time">
+                                {formatTime(item.createdAt)}
+                            </small>
 
-                        {/* MESSAGE */}
+                        </div>
+                    );
 
-                        <p>
-                            {item.message}
-                        </p>
-
-
-                        {/* TIME */}
-
-                        <small className="message-time">
-                            {formatTime(item.createdAt)}
-                        </small>
-
-                    </div>
-
-                ))
+                })
 
             )}
 
@@ -70,6 +60,4 @@ function Messages({ messages }) {
     );
 }
 
-
 export default Messages;
-
