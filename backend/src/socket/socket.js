@@ -8,12 +8,70 @@ const setupSocket = (io) => {
 
 
         // JOIN GROUP
-        socket.on("join-group", (groupId) => {
+        socket.on("join-group", (data) => {
 
+            const {
+                groupId,
+                nickname
+            } = data;
+
+            if (!groupId || !nickname) {
+                return;
+            }
+
+
+            // Save user information inside socket
+            socket.groupId = groupId;
+            socket.nickname = nickname.trim();
+
+
+            // Join Socket.IO room
             socket.join(groupId);
 
+
             console.log(
-                `Socket ${socket.id} joined group ${groupId}`
+                `${socket.nickname} joined group ${groupId}`
+            );
+
+
+            // Tell other users that someone joined
+            socket.to(groupId).emit(
+                "user-joined",
+                {
+                    nickname: socket.nickname
+                }
+            );
+
+
+            // Send updated member list
+            const room = io.sockets.adapter.rooms.get(groupId);
+
+            const members = [];
+
+            if (room) {
+
+                room.forEach((socketId) => {
+
+                    const memberSocket =
+                        io.sockets.sockets.get(socketId);
+
+                    if (memberSocket) {
+
+                        members.push({
+                            nickname:
+                                memberSocket.nickname
+                        });
+
+                    }
+
+                });
+
+            }
+
+
+            io.to(groupId).emit(
+                "members-update",
+                members
             );
 
         });
@@ -75,6 +133,69 @@ const setupSocket = (io) => {
                 socket.id
             );
 
+
+            // If user was inside a group
+            if (
+                socket.groupId &&
+                socket.nickname
+            ) {
+
+                const groupId =
+                    socket.groupId;
+
+                const nickname =
+                    socket.nickname;
+
+
+                // Tell remaining users
+                socket.to(groupId).emit(
+                    "user-left",
+                    {
+                        nickname: nickname
+                    }
+                );
+
+
+                // Get remaining members
+                const room =
+                    io.sockets.adapter.rooms.get(
+                        groupId
+                    );
+
+                const members = [];
+
+
+                if (room) {
+
+                    room.forEach((socketId) => {
+
+                        const memberSocket =
+                            io.sockets.sockets.get(
+                                socketId
+                            );
+
+                        if (memberSocket) {
+
+                            members.push({
+                                nickname:
+                                    memberSocket.nickname
+                            });
+
+                        }
+
+                    });
+
+                }
+
+
+                // Update members list
+                io.to(groupId).emit(
+                    "members-update",
+                    members
+                );
+
+            }
+
         });
 
     });
@@ -83,3 +204,4 @@ const setupSocket = (io) => {
 
 
 module.exports = setupSocket;
+
