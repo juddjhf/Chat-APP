@@ -578,3 +578,14 @@ button:disabled {
     color: #888;
     text-align: right;
 }
+
+/* OTHER USER MESSAGE */
+.other-message {
+    margin-right: auto;
+}
+
+/* MY MESSAGE */
+.my-message {
+    margin-left: auto;
+    text-align: left;
+}
