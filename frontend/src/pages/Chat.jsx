@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
@@ -11,24 +12,33 @@ function Chat() {
     const navigate = useNavigate();
 
     const [group, setGroup] = useState(null);
+
     const [messages, setMessages] = useState([]);
+
     const [message, setMessage] = useState("");
+
     const [socket, setSocket] = useState(null);
 
     const [members, setMembers] = useState([]);
 
     const [loadingMessages, setLoadingMessages] = useState(true);
+
     const [error, setError] = useState("");
 
 
+    // =========================
     // GET GROUP DATA
+    // =========================
+
     useEffect(() => {
 
         const savedGroup =
             sessionStorage.getItem("chatGroup");
 
         if (!savedGroup) {
+
             navigate("/");
+
             return;
         }
 
@@ -57,7 +67,10 @@ function Chat() {
     }, [navigate]);
 
 
+    // =========================
     // GET OLD MESSAGES
+    // =========================
+
     useEffect(() => {
 
         if (!group) {
@@ -69,6 +82,7 @@ function Chat() {
             try {
 
                 setLoadingMessages(true);
+
                 setError("");
 
                 const response = await fetch(
@@ -76,6 +90,7 @@ function Chat() {
                 );
 
                 const data = await response.json();
+
 
                 if (!response.ok) {
 
@@ -86,6 +101,7 @@ function Chat() {
 
                     return;
                 }
+
 
                 setMessages(
                     data.data || []
@@ -115,7 +131,10 @@ function Chat() {
     }, [group]);
 
 
+    // =========================
     // SOCKET.IO CONNECTION
+    // =========================
+
     useEffect(() => {
 
         if (!group) {
@@ -127,10 +146,14 @@ function Chat() {
             import.meta.env.VITE_API_URL
         );
 
+
         setSocket(newSocket);
 
 
+        // =========================
         // JOIN GROUP
+        // =========================
+
         newSocket.emit(
             "join-group",
             {
@@ -140,7 +163,10 @@ function Chat() {
         );
 
 
+        // =========================
         // RECEIVE MESSAGE
+        // =========================
+
         newSocket.on(
             "receive-message",
             (newMessage) => {
@@ -158,7 +184,10 @@ function Chat() {
         );
 
 
+        // =========================
         // USER JOINED
+        // =========================
+
         newSocket.on(
             "user-joined",
             (data) => {
@@ -171,7 +200,10 @@ function Chat() {
         );
 
 
+        // =========================
         // USER LEFT
+        // =========================
+
         newSocket.on(
             "user-left",
             (data) => {
@@ -184,7 +216,10 @@ function Chat() {
         );
 
 
+        // =========================
         // MEMBERS UPDATE
+        // =========================
+
         newSocket.on(
             "members-update",
             (membersList) => {
@@ -197,7 +232,10 @@ function Chat() {
         );
 
 
-        // SOCKET CONNECTION ERROR
+        // =========================
+        // SOCKET ERROR
+        // =========================
+
         newSocket.on(
             "connect_error",
             (error) => {
@@ -211,7 +249,10 @@ function Chat() {
         );
 
 
+        // =========================
         // CLEANUP
+        // =========================
+
         return () => {
 
             newSocket.disconnect();
@@ -221,7 +262,10 @@ function Chat() {
     }, [group]);
 
 
+    // =========================
     // SEND MESSAGE
+    // =========================
+
     const sendMessage = () => {
 
         if (!message.trim()) {
@@ -232,21 +276,28 @@ function Chat() {
             return;
         }
 
+
         socket.emit(
             "send-message",
             {
                 groupId: group.groupId,
+
                 nickname: group.nickname,
+
                 message: message.trim()
             }
         );
+
 
         setMessage("");
 
     };
 
 
-    // GROUP DATA LOADING
+    // =========================
+    // GROUP LOADING
+    // =========================
+
     if (!group) {
 
         return (
@@ -258,12 +309,16 @@ function Chat() {
     }
 
 
+    // =========================
+    // UI
+    // =========================
+
     return (
 
         <div className="chat-page">
 
 
-            {/* HEADER */}
+            {/* ================= HEADER ================= */}
 
             <header className="chat-header">
 
@@ -292,17 +347,17 @@ function Chat() {
 
 
 
-            {/* CHAT CONTAINER */}
+            {/* ================= CHAT CONTAINER ================= */}
 
             <div className="chat-container">
 
 
-                {/* CHAT MAIN */}
+                {/* ================= CHAT MAIN ================= */}
 
                 <main className="chat-main">
 
 
-                    {/* MESSAGES */}
+                    {/* ================= MESSAGES ================= */}
 
                     {loadingMessages ? (
 
@@ -335,7 +390,7 @@ function Chat() {
 
 
 
-                    {/* MESSAGE INPUT */}
+                    {/* ================= MESSAGE INPUT ================= */}
 
                     <MessageInput
                         message={message}
@@ -347,7 +402,7 @@ function Chat() {
 
 
 
-                {/* MEMBERS SIDEBAR */}
+                {/* ================= MEMBERS ================= */}
 
                 <aside className="chat-sidebar">
 
