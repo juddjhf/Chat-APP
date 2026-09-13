@@ -15,8 +15,11 @@ function Chat() {
     const [message, setMessage] = useState("");
     const [socket, setSocket] = useState(null);
 
+    const [members, setMembers] = useState([]);
+
     const [loadingMessages, setLoadingMessages] = useState(true);
     const [error, setError] = useState("");
+
 
     // GET GROUP DATA
     useEffect(() => {
@@ -119,6 +122,7 @@ function Chat() {
             return;
         }
 
+
         const newSocket = io(
             import.meta.env.VITE_API_URL
         );
@@ -129,7 +133,10 @@ function Chat() {
         // JOIN GROUP
         newSocket.emit(
             "join-group",
-            group.groupId
+            {
+                groupId: group.groupId,
+                nickname: group.nickname
+            }
         );
 
 
@@ -146,6 +153,45 @@ function Chat() {
                     ];
 
                 });
+
+            }
+        );
+
+
+        // USER JOINED
+        newSocket.on(
+            "user-joined",
+            (data) => {
+
+                console.log(
+                    `${data.nickname} joined the group`
+                );
+
+            }
+        );
+
+
+        // USER LEFT
+        newSocket.on(
+            "user-left",
+            (data) => {
+
+                console.log(
+                    `${data.nickname} left the group`
+                );
+
+            }
+        );
+
+
+        // MEMBERS UPDATE
+        newSocket.on(
+            "members-update",
+            (membersList) => {
+
+                setMembers(
+                    membersList
+                );
 
             }
         );
@@ -307,6 +353,7 @@ function Chat() {
 
                     <Members
                         nickname={group.nickname}
+                        members={members}
                     />
 
                 </aside>
@@ -321,6 +368,4 @@ function Chat() {
 }
 
 export default Chat;
-
-
 
