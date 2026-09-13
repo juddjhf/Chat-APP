@@ -6,37 +6,26 @@ import Messages from "../components/Messages";
 import Members from "../components/Members";
 import MessageInput from "../components/MessageInput";
 
-
 function Chat() {
 
     const navigate = useNavigate();
 
     const [group, setGroup] = useState(null);
-
     const [messages, setMessages] = useState([]);
-
     const [message, setMessage] = useState("");
-
     const [socket, setSocket] = useState(null);
 
     const [loadingMessages, setLoadingMessages] = useState(true);
-
     const [error, setError] = useState("");
 
-
-    // =========================
     // GET GROUP DATA
-    // =========================
-
     useEffect(() => {
 
         const savedGroup =
             sessionStorage.getItem("chatGroup");
 
         if (!savedGroup) {
-
             navigate("/");
-
             return;
         }
 
@@ -65,10 +54,7 @@ function Chat() {
     }, [navigate]);
 
 
-    // =========================
     // GET OLD MESSAGES
-    // =========================
-
     useEffect(() => {
 
         if (!group) {
@@ -80,7 +66,6 @@ function Chat() {
             try {
 
                 setLoadingMessages(true);
-
                 setError("");
 
                 const response = await fetch(
@@ -99,7 +84,9 @@ function Chat() {
                     return;
                 }
 
-                setMessages(data.data || []);
+                setMessages(
+                    data.data || []
+                );
 
             } catch (error) {
 
@@ -125,10 +112,7 @@ function Chat() {
     }, [group]);
 
 
-    // =========================
     // SOCKET.IO CONNECTION
-    // =========================
-
     useEffect(() => {
 
         if (!group) {
@@ -142,16 +126,14 @@ function Chat() {
         setSocket(newSocket);
 
 
-        // JOIN GROUP ROOM
-
+        // JOIN GROUP
         newSocket.emit(
             "join-group",
             group.groupId
         );
 
 
-        // RECEIVE NEW MESSAGE
-
+        // RECEIVE MESSAGE
         newSocket.on(
             "receive-message",
             (newMessage) => {
@@ -169,8 +151,7 @@ function Chat() {
         );
 
 
-        // SOCKET ERROR
-
+        // SOCKET CONNECTION ERROR
         newSocket.on(
             "connect_error",
             (error) => {
@@ -185,7 +166,6 @@ function Chat() {
 
 
         // CLEANUP
-
         return () => {
 
             newSocket.disconnect();
@@ -195,10 +175,7 @@ function Chat() {
     }, [group]);
 
 
-    // =========================
     // SEND MESSAGE
-    // =========================
-
     const sendMessage = () => {
 
         if (!message.trim()) {
@@ -223,10 +200,7 @@ function Chat() {
     };
 
 
-    // =========================
-    // LOADING
-    // =========================
-
+    // GROUP DATA LOADING
     if (!group) {
 
         return (
@@ -238,18 +212,12 @@ function Chat() {
     }
 
 
-    // =========================
-    // UI
-    // =========================
-
     return (
 
         <div className="chat-page">
 
 
-            {/* =========================
-                HEADER
-            ========================= */}
+            {/* HEADER */}
 
             <header className="chat-header">
 
@@ -277,16 +245,13 @@ function Chat() {
             </header>
 
 
-            {/* =========================
-                CHAT CONTAINER
-            ========================= */}
+
+            {/* CHAT CONTAINER */}
 
             <div className="chat-container">
 
 
-                {/* =========================
-                    CHAT MAIN
-                ========================= */}
+                {/* CHAT MAIN */}
 
                 <main className="chat-main">
 
@@ -317,9 +282,11 @@ function Chat() {
 
                         <Messages
                             messages={messages}
+                            currentNickname={group.nickname}
                         />
 
                     )}
+
 
 
                     {/* MESSAGE INPUT */}
@@ -333,9 +300,8 @@ function Chat() {
                 </main>
 
 
-                {/* =========================
-                    MEMBERS SIDEBAR
-                ========================= */}
+
+                {/* MEMBERS SIDEBAR */}
 
                 <aside className="chat-sidebar">
 
@@ -345,6 +311,7 @@ function Chat() {
 
                 </aside>
 
+
             </div>
 
         </div>
@@ -353,6 +320,7 @@ function Chat() {
 
 }
 
-
 export default Chat;
 
+
+Ab **tumhara message right** aur **other users ke messages left** aayenge.
