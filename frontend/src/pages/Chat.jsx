@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 
-import Messages from "../components/Messages";
 import Members from "../components/Members";
 import MessageInput from "../components/MessageInput";
 
@@ -20,11 +19,13 @@ function Chat() {
     const [error, setError] = useState("");
 
     // =========================
-    // AUTO SCROLL REF
+    // MESSAGE SCROLL
     // =========================
 
     const messagesRef = useRef(null);
 
+    // User bottom ke paas hai ya nahi
+    const shouldAutoScroll = useRef(true);
 
     // =========================
     // GET GROUP DATA
@@ -91,7 +92,6 @@ function Chat() {
 
                 const data = await response.json();
 
-
                 if (!response.ok) {
 
                     setError(
@@ -101,7 +101,6 @@ function Chat() {
 
                     return;
                 }
-
 
                 setMessages(
                     data.data || []
@@ -132,18 +131,27 @@ function Chat() {
 
 
     // =========================
-    // AUTO SCROLL WHEN MESSAGE CHANGES
+    // AUTO SCROLL
     // =========================
 
     useEffect(() => {
 
-        if (!messagesRef.current) {
+        const container =
+            messagesRef.current;
+
+        if (!container) {
             return;
         }
 
-        messagesRef.current.scrollTo({
-            top: messagesRef.current.scrollHeight,
-            behavior: "smooth"
+        if (!shouldAutoScroll.current) {
+            return;
+        }
+
+        requestAnimationFrame(() => {
+
+            container.scrollTop =
+                container.scrollHeight;
+
         });
 
     }, [messages]);
@@ -159,11 +167,9 @@ function Chat() {
             return;
         }
 
-
         const newSocket = io(
             import.meta.env.VITE_API_URL
         );
-
 
         setSocket(newSocket);
 
@@ -188,6 +194,16 @@ function Chat() {
         newSocket.on(
             "receive-message",
             (newMessage) => {
+
+                /*
+                 * New message aaya.
+                 *
+                 * Agar user bottom ke paas hai
+                 * to auto-scroll hoga.
+                 *
+                 * Agar user purane messages
+                 * padh raha hai to wahi rahega.
+                 */
 
                 setMessages((prev) => {
 
@@ -294,6 +310,12 @@ function Chat() {
             return;
         }
 
+        /*
+         * Apna message bhejte waqt
+         * hamesha bottom par jana hai.
+         */
+
+        shouldAutoScroll.current = true;
 
         socket.emit(
             "send-message",
@@ -306,8 +328,42 @@ function Chat() {
             }
         );
 
-
         setMessage("");
+
+    };
+
+
+    // =========================
+    // HANDLE MESSAGE SCROLL
+    // =========================
+
+    const handleMessagesScroll = () => {
+
+        const container =
+            messagesRef.current;
+
+        if (!container) {
+            return;
+        }
+
+        /*
+         * Current position se bottom
+         * kitna door hai.
+         */
+
+        const distanceFromBottom =
+            container.scrollHeight -
+            container.scrollTop -
+            container.clientHeight;
+
+
+        /*
+         * 100px ke andar hai to
+         * user bottom par maana jayega.
+         */
+
+        shouldAutoScroll.current =
+            distanceFromBottom < 100;
 
     };
 
@@ -379,10 +435,7 @@ function Chat() {
 
                     {loadingMessages ? (
 
-                        <div
-                            className="messages"
-                            ref={messagesRef}
-                        >
+                        <div className="messages">
 
                             <p className="no-messages">
                                 Loading messages...
@@ -392,10 +445,7 @@ function Chat() {
 
                     ) : error ? (
 
-                        <div
-                            className="messages"
-                            ref={messagesRef}
-                        >
+                        <div className="messages">
 
                             <p className="error">
                                 {error}
@@ -408,12 +458,64 @@ function Chat() {
                         <div
                             className="messages"
                             ref={messagesRef}
+                            onScroll={handleMessagesScroll}
                         >
 
-                            <Messages
-                                messages={messages}
-                                currentNickname={group.nickname}
-                            />
+                            {messages.length === 0 ? (
+
+                                <p className="no-messages">
+                                    No messages yet
+                                </p>
+
+                            ) : (
+
+                                messages.map(
+                                    (msg, index) => (
+
+                                        <div
+                                            key={
+                                                msg._id ||
+                                                msg.id ||
+                                                index
+                                            }
+                                            className={`message ${
+                                                msg.nickname ===
+                                                group.nickname
+                                                    ? "my-message"
+                                                    : "other-message"
+                                            }`}
+                                        >
+
+                                            <strong>
+                                                {msg.nickname}
+                                            </strong>
+
+                                            <p>
+                                                {msg.message}
+                                            </p>
+
+                                            {msg.createdAt && (
+
+                                                <span className="message-time">
+                                                    {new Date(
+                                                        msg.createdAt
+                                                    ).toLocaleTimeString(
+                                                        [],
+                                                        {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit"
+                                                        }
+                                                    )}
+                                                </span>
+
+                                            )}
+
+                                        </div>
+
+                                    )
+                                )
+
+                            )}
 
                         </div>
 
@@ -428,6 +530,7 @@ function Chat() {
                         setMessage={setMessage}
                         onSend={sendMessage}
                     />
+
 
                 </main>
 
