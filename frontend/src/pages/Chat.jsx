@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 
@@ -12,18 +12,18 @@ function Chat() {
     const navigate = useNavigate();
 
     const [group, setGroup] = useState(null);
-
     const [messages, setMessages] = useState([]);
-
     const [message, setMessage] = useState("");
-
     const [socket, setSocket] = useState(null);
-
     const [members, setMembers] = useState([]);
-
     const [loadingMessages, setLoadingMessages] = useState(true);
-
     const [error, setError] = useState("");
+
+    // =========================
+    // AUTO SCROLL REF
+    // =========================
+
+    const messagesRef = useRef(null);
 
 
     // =========================
@@ -129,6 +129,24 @@ function Chat() {
         getOldMessages();
 
     }, [group]);
+
+
+    // =========================
+    // AUTO SCROLL WHEN MESSAGE CHANGES
+    // =========================
+
+    useEffect(() => {
+
+        if (!messagesRef.current) {
+            return;
+        }
+
+        messagesRef.current.scrollTo({
+            top: messagesRef.current.scrollHeight,
+            behavior: "smooth"
+        });
+
+    }, [messages]);
 
 
     // =========================
@@ -361,7 +379,10 @@ function Chat() {
 
                     {loadingMessages ? (
 
-                        <div className="messages">
+                        <div
+                            className="messages"
+                            ref={messagesRef}
+                        >
 
                             <p className="no-messages">
                                 Loading messages...
@@ -371,7 +392,10 @@ function Chat() {
 
                     ) : error ? (
 
-                        <div className="messages">
+                        <div
+                            className="messages"
+                            ref={messagesRef}
+                        >
 
                             <p className="error">
                                 {error}
@@ -381,10 +405,17 @@ function Chat() {
 
                     ) : (
 
-                        <Messages
-                            messages={messages}
-                            currentNickname={group.nickname}
-                        />
+                        <div
+                            className="messages"
+                            ref={messagesRef}
+                        >
+
+                            <Messages
+                                messages={messages}
+                                currentNickname={group.nickname}
+                            />
+
+                        </div>
 
                     )}
 
