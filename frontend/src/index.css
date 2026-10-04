@@ -184,6 +184,10 @@ button:disabled {
     flex-direction: column;
 
     overflow: hidden;
+
+    /* Prevent page itself from scrolling */
+    position: fixed;
+    inset: 0;
 }
 
 
@@ -263,7 +267,12 @@ button:disabled {
     flex: 1;
 
     min-height: 0;
+    min-width: 0;
 
+    /*
+     * IMPORTANT:
+     * Only messages area scroll karega.
+     */
     overflow-y: auto;
     overflow-x: hidden;
 
@@ -272,11 +281,33 @@ button:disabled {
     display: flex;
     flex-direction: column;
 
+    /*
+     * Smooth scrolling when JavaScript
+     * moves the chat to the bottom.
+     */
     scroll-behavior: smooth;
+
+    /*
+     * Prevent scroll from propagating
+     * to the complete page.
+     */
+    overscroll-behavior: contain;
+
+    /*
+     * Better scrolling on mobile.
+     */
+    -webkit-overflow-scrolling: touch;
+
+    /*
+     * Prevent horizontal layout movement.
+     */
+    scrollbar-gutter: stable;
 }
 
 
-/* Scrollbar */
+/* =========================
+   Scrollbar
+========================= */
 
 .messages::-webkit-scrollbar {
     width: 6px;
@@ -292,9 +323,9 @@ button:disabled {
 }
 
 
-/* =========================
+/* ==================================================
    MESSAGE
-========================= */
+================================================== */
 
 .message {
     width: fit-content;
@@ -568,6 +599,9 @@ button:disabled {
         height: 100dvh;
 
         overflow: hidden;
+
+        position: fixed;
+        inset: 0;
     }
 
 
@@ -637,11 +671,20 @@ button:disabled {
         flex: 1;
 
         min-height: 0;
+        min-width: 0;
 
         padding: 12px 10px;
 
         overflow-y: auto;
         overflow-x: hidden;
+
+        overscroll-behavior: contain;
+
+        -webkit-overflow-scrolling: touch;
+
+        scroll-behavior: smooth;
+
+        scrollbar-gutter: stable;
     }
 
     .message {
@@ -775,6 +818,12 @@ button:disabled {
 
     .messages {
         padding: 10px 8px;
+
+        overflow-y: auto;
+
+        overscroll-behavior: contain;
+
+        -webkit-overflow-scrolling: touch;
     }
 
     .message {
